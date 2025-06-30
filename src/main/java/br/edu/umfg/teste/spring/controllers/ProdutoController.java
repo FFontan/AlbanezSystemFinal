@@ -148,19 +148,21 @@ public class ProdutoController {
             result.rejectValue("precoVenda", "erro.precoVenda", "Preço de venda não pode ser menor que o desconto ativo.");
         }
 
+        Produto produtoExistente = produtoRepository.findById(id).orElseThrow();
+
         if (result.hasErrors()) {
             logger.warn("Erro ao atualizar produto ID {}: {}", id, result.getAllErrors());
-            Produto produtoExistente = produtoRepository.findById(id).orElseThrow();
-            produto.setImagem(produtoExistente.getImagem());
+            produto.setImagem(produtoExistente.getImagem()); // Mantém imagem no retorno
             return "editarProduto";
         }
 
-        Produto produtoExistente = produtoRepository.findById(id).orElseThrow();
+        boolean imagemExcluida = "true".equals(excluirImagem);
 
-        if ("true".equals(excluirImagem)) {
+        // Exclusão da imagem antiga, se solicitado
+        if (imagemExcluida) {
             if (produtoExistente.getImagem() != null && !produtoExistente.getImagem().isEmpty()) {
                 String imagem = produtoExistente.getImagem();
-                if (!imagem.startsWith("http")) { // só tenta excluir se for local
+                if (!imagem.startsWith("http")) {
                     String nomeArquivo = imagem.replace("/images-produtos/", "");
                     Path caminhoImagem = Paths.get(System.getProperty("user.dir"), "images-produtos", nomeArquivo);
                     try {
@@ -176,6 +178,7 @@ public class ProdutoController {
             produto.setImagem(null);
         }
 
+        // Upload de nova imagem
         if (!imagemFile.isEmpty()) {
             try {
                 Map uploadResult = cloudinary.uploader().upload(imagemFile.getBytes(), ObjectUtils.emptyMap());
@@ -185,6 +188,9 @@ public class ProdutoController {
             } catch (IOException e) {
                 logger.error("Erro ao enviar nova imagem para o Cloudinary: {}", e.getMessage(), e);
             }
+        } else if (!imagemExcluida) {
+            // Se imagem não foi enviada e também não foi excluída, mantém a imagem atual
+            produto.setImagem(produtoExistente.getImagem());
         }
 
         produtoRepository.save(produto);
