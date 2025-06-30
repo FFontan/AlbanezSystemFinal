@@ -24,7 +24,7 @@
     <div th:replace="~{fragments/lista-utils :: filtroEExportacao(
        @{/listaFuncionario},
        ${filtro},
-       'Buscar por ID, Nome ou CPF',
+       'Buscar por ID, Nome ou Documento',
        |exportarTabelaFuncionarios()|
        )}">
     </div>
@@ -32,7 +32,7 @@
         <thead>
         <tr>
             <th data-coluna="id">ID</th>
-            <th data-coluna="documento">CPF</th>
+            <th data-coluna="documento">Documento</th>
             <th data-coluna="nome">Nome</th>
             <th data-coluna="telefone">Fone</th>
             <th data-coluna="dataNasc">Data de Nascimento</th>
