@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Vendas</title>
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+  <div class="mensagem-container">
+    <div th:if="${confirmacao}" class="mensagem confirmacao" th:text="${confirmacao}"></div>
+  </div>
+
+  <h2>Lista de Vendas</h2>
+
+  <div th:replace="~{fragments/lista-utils :: filtroEExportacao(
+     @{/listaVendas},
+     ${filtro},
+     'Buscar por ID ou Cliente',
+     |exportarTabelaVendas()|
+  )}">
+  </div>
+
+  <table id="tabela-vendas">
+    <thead>
+    <tr>
+      <th data-coluna="id">ID</th>
+      <th data-coluna="cliente">Cliente</th>
+      <th data-coluna="data">Data</th>
+      <th data-coluna="total">Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="venda : ${vendas}">
+      <td data-coluna="id" th:text="${venda.id}">1</td>
+      <td data-coluna="cliente" th:text="${venda.cliente.nome}">João</td>
+      <td data-coluna="data"
+          th:text="${venda.dataVenda != null ? #temporals.format(venda.dataVenda, 'dd/MM/yyyy HH:mm') : 'Sem data'}">Sem data</td>
+      <td data-coluna="total" th:text="${#numbers.formatDecimal(venda.total, 1, 'POINT', 2, 'COMMA')}">R$ 120,00</td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="botoes-centralizados">
+    <a href="/index" class="btn-acao back-link">Voltar</a>
+    <a href="/realizaVenda" class="btn-acao back-link">Fazer Venda</a>
+  </div>
+</div>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.mensagem').forEach(el => el.style.display = 'none');
+  }, 4000);
+</script>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/exportPdf.js"></script>
+</body>
+</html>

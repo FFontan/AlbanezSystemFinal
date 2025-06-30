@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Listagem de Fornecedores</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <div class="mensagem-container">
+        <div th:if="${error}" class="mensagem erro" th:text="${error}"></div>
+    </div>
+
+    <div class="mensagem-container">
+        <div th:if="${confirmacao}" class="mensagem confirmacao" th:text="${confirmacao}"></div>
+    </div>
+
+    <h2>Lista de Fornecedores</h2>
+
+    <div th:replace="~{fragments/lista-utils :: filtroEExportacao(@{/listaFornecedor}, ${filtro}, 'Buscar por ID, Nome ou CNPJ', |exportarTabelaFornecedores()|)}"></div>
+
+    <table id="tabela-fornecedores">
+        <thead>
+        <tr>
+            <th data-coluna="id">ID</th>
+            <th data-coluna="documento">CNPJ</th>
+            <th data-coluna="nomeFantasia">Nome Fantasia</th>
+            <th data-coluna="inscricaoEstadual">IE</th>
+            <th data-coluna="razaoSocial">Razão Social</th>
+            <th data-coluna="telefone">Telefone</th>
+            <th data-coluna="logradouro">Logradouro</th>
+            <th data-coluna="numeroEndereco">Número</th>
+            <th data-coluna="bairro">Bairro</th>
+            <th data-coluna="cep">CEP</th>
+            <th data-coluna="cidade">Cidade</th>
+            <th data-coluna="uf">UF</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="fornecedor : ${listaFornecedores}">
+            <td data-coluna="id" th:text="${fornecedor.id}"></td>
+            <td data-coluna="documento" th:text="${fornecedor.documento}"></td>
+            <td data-coluna="nomeFantasia" th:text="${fornecedor.nomeFantasia}"></td>
+            <td data-coluna="inscricaoEstadual" th:text="${fornecedor.inscricaoEstadual}"></td>
+            <td data-coluna="razaoSocial" th:text="${fornecedor.razaoSocial}"></td>
+            <td data-coluna="telefone" th:text="${fornecedor.telefone}"></td>
+            <td data-coluna="logradouro" th:text="${fornecedor.endereco.logradouro}"></td>
+            <td data-coluna="numeroEndereco" th:text="${fornecedor.endereco.numeroEndereco}"></td>
+            <td data-coluna="bairro" th:text="${fornecedor.endereco.bairro}"></td>
+            <td data-coluna="cep" th:text="${fornecedor.endereco.cep}"></td>
+            <td data-coluna="cidade" th:text="${fornecedor.endereco.cidade}"></td>
+            <td data-coluna="uf" th:text="${fornecedor.endereco.uf}"></td>
+            <td class="actions" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0;">
+                <a th:href="@{'/editarFornecedor/' + ${fornecedor.id}}" title="Editar" class="btn-icon editar"><i class="bi bi-pencil"></i></a>
+                <a href="javascript:void(0);"
+                   th:attr="data-id=${fornecedor.id}"
+                   onclick="confirmarBotao('Deseja realmente excluir este fornecedor?', () => window.location.href='/excluirFornecedor/' + this.getAttribute('data-id'))"
+                   title="Excluir"
+                   class="btn-icon excluir">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="botoes-centralizados">
+        <a th:href="@{/index}" class="btn-acao back-link">Voltar</a>
+        <a th:href="@{/cadastroFornecedor}" class="btn-acao back-link">Cadastrar</a>
+    </div>
+</div>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script>
+    setTimeout(() => {
+      document.querySelectorAll('.mensagem').forEach(el => el.style.display = 'none');
+    }, 4000);
+</script>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/exportPdf.js"></script>
+</body>
+</html>

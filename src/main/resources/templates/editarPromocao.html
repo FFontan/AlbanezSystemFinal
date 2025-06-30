@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Editar Promoção</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+    <div class="form-wrapper">
+        <h1>Editar Promoção</h1>
+        <!-- Div para mensagens de erro -->
+        <div id="mensagemErro" class="mensagem-erro" style="display: none;"></div>
+
+        <form th:action="@{'/promocao/atualizar/' + ${promocao.id}}"
+              th:object="${promocao}"
+              method="post">
+
+            <input type="hidden" th:field="*{id}" />
+
+            <label>Nome da Promoção:</label>
+            <input type="text" th:field="*{nome}" required /><br/><br/>
+
+            <label>Data de Fim:</label>
+            <input type="datetime-local" th:value="${dataFimFormatada}" name="dataFim" required id="dataFim" /><br/><br/>
+
+            <h2>Produtos na Promoção</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>Remover</th>
+                    <th>Produto</th>
+                    <th>Preço Atual</th>
+                    <th>Desconto Atual</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item, iterStat : ${produtosPromocao}" th:attr="data-preco=${item.produto.precoVenda}" th:data-id="${item.produto.id}">
+                    <td>
+                        <input type="checkbox"
+                               name="removerProdutoIds"
+                               th:value="${item.produto.id}"
+                               class="remover-checkbox" />
+                    </td>
+                    <input type="hidden"
+                           name="produtosExistentesIds"
+                           th:value="${item.produto.id}" />
+
+                    <td th:text="${item.produto.descricao}">Nome do Produto</td>
+                    <td th:text="${item.produto.precoVenda}">Preço</td>
+                    <td style="display: flex; justify-content: center;">
+                        <input type="number"
+                               step="0.01"
+                               name="valoresDescontoExistentes"
+                               th:value="${item.valorDesconto}"
+                               class="desconto-existente"
+                               style="width: 50%;"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h2>Adicionar Novos Produtos</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>Selecionar</th>
+                    <th>Produto</th>
+                    <th>Preço Atual</th>
+                    <th>Valor do Desconto</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="produto : ${produtosDisponiveisAll}"
+                    th:attr="data-preco=${produto.precoVenda}" th:data-id="${produto.id}">
+
+                    <td>
+                        <input type="checkbox"
+                               name="novoProdutoIds"
+                               th:value="${produto.id}"
+                               class="novo-checkbox"
+                               th:disabled="${produtosEmOutraPromocao.contains(produto.id)}" />
+                    </td>
+
+                    <!-- Descrição -->
+                    <td th:text="${produto.descricao}">Nome do Produto</td>
+
+                    <!-- Preço -->
+                    <td th:text="${produto.precoVenda}">Preço</td>
+
+                    <!-- Desconto -->
+                    <td style="display: flex; justify-content: center;">
+                        <input type="number"
+                               step="0.01"
+                               name="valoresDescontoNovos"
+                               placeholder="Desconto"
+                               class="desconto-novo"
+                               th:disabled="${produtosEmOutraPromocao.contains(produto.id)}"
+                               style="width: 50%;"/>
+                    </td>
+
+                    <!-- Status: exibe o erro -->
+                    <td>
+                        <small th:if="${produtosEmOutraPromocao.contains(produto.id)}" style="color: red; font-weight: bold;">Já está em outra promoção ativa</small>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+
+            <button type="button"
+                    id="salvarButton"
+                    disabled
+                    onclick="confirmarEnvioForm(this, 'Deseja realmente salvar as alterações desta promoção?')">
+                Salvar Alterações
+            </button>
+
+        </form>
+
+        <br/>
+        <div class="botoes-centralizados">
+            <a href="/index" class="btn-acao back-link">Voltar</a>
+            <a href="/listaPromocao" class="btn-acao back-link">Lista</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validarDataFim() {
+        const dataFimInput = document.getElementById('dataFim');
+        const dataAtual    = new Date();
+        dataAtual.setMinutes(dataAtual.getMinutes() + 1);
+
+        const ano    = dataAtual.getFullYear();
+        const mes    = String(dataAtual.getMonth() + 1).padStart(2, '0');
+        const dia    = String(dataAtual.getDate()).padStart(2, '0');
+        const hora   = String(dataAtual.getHours()).padStart(2, '0');
+        const minuto = String(dataAtual.getMinutes()).padStart(2, '0');
+
+        dataFimInput.min = `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+    }
+
+    function verificarAlteracoes() {
+        const removerCheckboxes   = Array.from(document.querySelectorAll('.remover-checkbox'));
+        const novoCheckboxes      = Array.from(document.querySelectorAll('.novo-checkbox'));
+        const descontosExistentes = Array.from(document.querySelectorAll('.desconto-existente'));
+        const descontosNovos      = Array.from(document.querySelectorAll('.desconto-novo'));
+        const salvarButton        = document.getElementById('salvarButton');
+        const mensagemErro        = document.getElementById('mensagemErro');
+
+        mensagemErro.style.display = 'none';
+        mensagemErro.innerText = '';
+
+        // Habilita ou desabilita o campo desconto-novo conforme checkbox
+        novoCheckboxes.forEach((cb, idx) => {
+            descontosNovos[idx].disabled = !cb.checked;
+            if (!cb.checked) descontosNovos[idx].value = '';
+        });
+
+        // Valida descontos dos produtos EXISTENTES que NÃO foram marcados para remoção
+        for(let i = 0; i < descontosExistentes.length; i++) {
+            const desconto = parseFloat(descontosExistentes[i].value);
+            const removido = removerCheckboxes[i].checked;
+            const tr = descontosExistentes[i].closest('tr');
+            const preco = parseFloat(tr.getAttribute('data-preco'));
+            const nomeProduto = tr.querySelector('td:nth-child(3)').innerText;
+
+            if (!removido) {
+                if (isNaN(desconto) || desconto <= 0) {
+                    mensagemErro.innerText = `Informe um desconto maior que 0 para o produto "${nomeProduto}".`;
+                    mensagemErro.style.display = 'block';
+                    salvarButton.disabled = true;
+                    return;
+                }
+                if (desconto > (preco - 0.01)) {
+                    mensagemErro.innerText = `O desconto não pode ser maior que R$ ${(preco - 0.01).toFixed(2)} para o produto "${nomeProduto}".`;
+                    mensagemErro.style.display = 'block';
+                    salvarButton.disabled = true;
+                    return;
+                }
+            }
+        }
+
+        // Valida descontos dos novos produtos selecionados
+        for(let i = 0; i < novoCheckboxes.length; i++) {
+            if (novoCheckboxes[i].checked) {
+                const desconto = parseFloat(descontosNovos[i].value);
+                const tr = novoCheckboxes[i].closest('tr');
+                const preco = parseFloat(tr.getAttribute('data-preco'));
+                const nomeProduto = tr.querySelector('td:nth-child(2)').innerText;
+
+                if (isNaN(desconto) || desconto <= 0) {
+                    mensagemErro.innerText = `Informe um desconto maior que 0 para o novo produto "${nomeProduto}".`;
+                    mensagemErro.style.display = 'block';
+                    salvarButton.disabled = true;
+                    return;
+                }
+                if (desconto > (preco - 0.01)) {
+                    mensagemErro.innerText = `O desconto não pode ser maior que R$ ${(preco - 0.01).toFixed(2)} para o novo produto "${nomeProduto}".`;
+                    mensagemErro.style.display = 'block';
+                    salvarButton.disabled = true;
+                    return;
+                }
+            }
+        }
+
+        // Verifica se há pelo menos um produto válido na promoção
+        const temProdutoExistente = removerCheckboxes.some(cb => !cb.checked);
+        const temProdutoNovo = novoCheckboxes.some(cb => cb.checked);
+
+        if (!temProdutoExistente && !temProdutoNovo) {
+            mensagemErro.innerText = 'Selecione pelo menos um produto para a promoção.';
+            mensagemErro.style.display = 'block';
+            salvarButton.disabled = true;
+            return;
+        }
+
+        // Se chegou aqui, tudo está válido
+        mensagemErro.style.display = 'none';
+        mensagemErro.innerText = '';
+        salvarButton.disabled = false;
+    }
+
+    // registra listeners
+    document.querySelectorAll('.remover-checkbox')
+            .forEach(cb => cb.addEventListener('change', verificarAlteracoes));
+    document.querySelectorAll('.novo-checkbox')
+            .forEach(cb => cb.addEventListener('change', verificarAlteracoes));
+    document.querySelectorAll('.desconto-existente')
+            .forEach(inp => inp.addEventListener('input', verificarAlteracoes));
+    document.querySelectorAll('.desconto-novo')
+            .forEach(inp => inp.addEventListener('input', verificarAlteracoes));
+
+    // chamadas iniciais
+    validarDataFim();
+    verificarAlteracoes();
+</script>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+</body>
+</html>

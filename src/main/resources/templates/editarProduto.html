@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Produto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="form-page">
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+    <div class="form-wrapper">
+
+        <h1>Editar Produto</h1>
+
+        <form th:action="@{'/editarProduto/' + ${produto.id}}" th:object="${produto}" method="post" enctype="multipart/form-data" class="form-cadastro">
+
+            <div class="linha" style="justify-content: center;">
+                <img th:src="${produto.imagem != null && produto.imagem != '' ? produto.imagem : '/images-produtos/sem-imagem.png'}"
+                     alt="Imagem do Produto"
+                     style="max-width: 300px; max-height: 300px; border: 1px solid #ccc; padding: 5px; border-radius: 8px;" />
+            </div>
+
+            <div class="linha" style="justify-content: center;">
+                <label>
+                    <input type="checkbox" name="excluirImagem" value="true" />
+                    Excluir imagem atual
+                </label>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="imagemFile">Alterar Imagem</label>
+                    <input type="file" id="imagemFile" name="imagemFile" accept="image/*" />
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="descricao">Descrição</label>
+                    <input type="text" id="descricao" th:field="*{descricao}" />
+                    <div class="erroFormulario" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></div>
+                </div>
+                <div>
+                    <label for="quantidade">Quantidade</label>
+                    <input type="number" id="quantidade" th:field="*{quantidade}" required min="0" max="999999" />
+                    <div class="erroFormulario" th:if="${#fields.hasErrors('quantidade')}" th:errors="*{quantidade}"></div>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="precoCusto">Preço de Custo</label>
+                    <input type="number" id="precoCusto" th:field="*{precoCusto}" step="0.01" />
+                    <div class="erroFormulario" th:if="${#fields.hasErrors('precoCusto')}" th:errors="*{precoCusto}"></div>
+                </div>
+                <div>
+                    <label for="precoVenda">Preço de Venda</label>
+                    <input type="number" id="precoVenda" th:field="*{precoVenda}" step="0.01" required />
+                    <div class="erroFormulario" th:if="${#fields.hasErrors('precoVenda')}" th:errors="*{precoVenda}"></div>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="desconto">Desconto Ativo</label>
+                    <input type="text" id="desconto" th:field="*{desconto}" readonly />
+                </div>
+                <div>
+                    <label for="precoFinal">Preço Final</label>
+                    <input type="text" id="precoFinal" th:value="${#numbers.formatDecimal(produto.precoFinal, 1, 'COMMA', 2, 'POINT')}" readonly />
+                </div>
+            </div>
+
+            <!-- Botão com confirmação -->
+            <button type="button" onclick="confirmarEnvioForm(this, 'Deseja salvar as alterações?')" class="btn-acao" style="width: 100%;">
+                Salvar
+            </button>
+        </form>
+
+        <div class="botoes-centralizados">
+            <a href="/index" class="btn-acao back-link">Voltar</a>
+            <a href="/listaProduto" class="btn-acao back-link">Lista</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação e scripts -->
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/dropdown.js"></script>
+<script src="/js/formValidations.js"></script>
+<script src="/js/confirmacoes.js"></script>
+
+</body>
+</html>

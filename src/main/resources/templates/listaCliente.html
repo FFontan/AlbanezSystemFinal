@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Listagem de Clientes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <div class="mensagem-container">
+        <div th:if="${confirmacao}" class="mensagem confirmacao" th:text="${confirmacao}"></div>
+        <div th:if="${sucesso}" class="mensagem sucesso" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="mensagem erro" th:text="${erro}"></div>
+    </div>
+
+    <h2>Lista de Clientes</h2>
+
+    <div th:replace="fragments/lista-utils :: filtroEExportacao('/listaCliente',  ${filtro}, 'Buscar por ID ou Nome', 'exportarTabelaClientes()')"></div>
+
+    <table id="tabela-clientes">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>CPF</th>
+            <th>Nome</th>
+            <th>Fone</th>
+            <th>Logradouro</th>
+            <th>Numero</th>
+            <th>Bairro</th>
+            <th>CEP</th>
+            <th>Cidade</th>
+            <th>UF</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cliente : ${clientes}">
+            <td data-coluna="id" th:text="${cliente.id}"></td>
+            <td data-coluna="documento" th:text="${cliente.documento}"></td>
+            <td data-coluna="nome" th:text="${cliente.nome}"></td>
+            <td data-coluna="telefone" th:text="${cliente.telefone}"></td>
+            <td data-coluna="logradouro" th:text="${cliente.endereco.logradouro}"></td>
+            <td data-coluna="numeroEndereco" th:text="${cliente.endereco.numeroEndereco}"></td>
+            <td data-coluna="bairro" th:text="${cliente.endereco.bairro}"></td>
+            <td data-coluna="cep" th:text="${cliente.endereco.cep}"></td>
+            <td data-coluna="cidade" th:text="${cliente.endereco.cidade}"></td>
+            <td data-coluna="uf" th:text="${cliente.endereco.uf}"></td>
+            <td class="actions" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0;">
+                <a th:href="@{'/editarCliente/' + ${cliente.id}}" title="Editar" class="btn-icon editar"><i class="bi bi-pencil"></i></a>
+                <a href="javascript:void(0);"
+                   th:attr="data-id=${cliente.id}"
+                   onclick="confirmarBotao('Deseja realmente excluir este cliente?', () => window.location.href='/excluirCliente/' + this.getAttribute('data-id'))"
+                   title="Excluir"
+                   class="btn-icon excluir">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="botoes-centralizados">
+        <a href="/index" class="btn-acao back-link">Voltar</a>
+        <a href="/cadastroCliente" class="btn-acao back-link">Cadastrar</a>
+    </div>
+</div>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script>
+    setTimeout(() => {
+      document.querySelectorAll('.mensagem').forEach(el => el.style.display = 'none');
+    }, 4000);
+</script>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/exportPdf.js"></script>
+</body>
+</html>

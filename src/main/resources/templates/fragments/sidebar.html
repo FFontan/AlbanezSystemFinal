@@ -1,0 +1,48 @@
+<div th:fragment="sidebar" xmlns:th="http://www.w3.org/1999/xhtml">
+  <div class="sidebar">
+    <img th:src="@{/images/logo-albanez.png}" alt="Logo Móveis Albanez" class="logo-sidebar">
+    <div class="menu">
+      <a href="/index" th:classappend="${active=='home'}? ' active'">Home</a>
+
+      <div class="dropdown">
+        <a href="#">Cadastros ▼</a>
+        <div class="dropdown-content">
+          <a href="/cadastroFuncionario">Funcionário</a>
+          <a href="/cadastroProduto">Produto</a>
+          <a href="/cadastroFornecedor">Fornecedor</a>
+          <a href="/cadastroCliente">Cliente</a>
+          <a href="/cadastroPromocao">Promoção</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <a href="#">Relatórios ▼</a>
+        <div class="dropdown-content">
+          <a href="/listaProduto">Produto</a>
+          <a href="/listaFuncionario">Funcionário</a>
+          <a href="/listaFornecedor">Fornecedor</a>
+          <a href="/listaCliente">Cliente</a>
+          <a href="/listaPedido">Entradas De Produtos</a>
+          <a href="/listaPromocao">Promoções</a>
+          <a href="/listaVendas">Vendas</a>
+        </div>
+      </div>
+
+      <a href="/cadastroPedido">Entrada De Produtos</a>
+      <a href="/realizaVenda">Venda</a>
+      <a href="#" onclick="logout()"><i class="bi bi-box-arrow-left"></i> Sair</a>
+    </div>
+  </div>
+  <script>
+    function logout() {
+      if (confirm("Tem certeza que deseja sair?")) {
+        fetch('/logout', {
+          method: 'POST',
+          credentials: 'same-origin'
+        }).then(() => {
+          window.location.href = "/login";
+        });
+      }
+    }
+  </script>
+</div>

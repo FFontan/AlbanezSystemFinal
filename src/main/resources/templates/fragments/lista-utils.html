@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="filtroEExportacao(filtroUrl, filtroValor, placeholder, exportFunction)">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <!-- Formulário de busca reutilizável -->
+        <form th:action="${filtroUrl}" method="get" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" name="filtro" th:placeholder="${placeholder}" th:value="${filtroValor}" style="width: 250px;" />
+            <button type="submit" class="btn-acao">Buscar</button>
+        </form>
+
+        <!-- Corrigido: Botão de exportação -->
+        <button type="button" class="btn-acao" th:attr="onclick=|${exportFunction}|">Exportar para PDF</button>
+    </div>
+</div>
+</body>
+</html>

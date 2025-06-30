@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos</title>
+    <!-- Link para o Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+    <div class="mensagem-container">
+        <div th:if="${confirmacao}" class="mensagem confirmacao" th:text="${confirmacao}"></div>
+    </div>
+
+    <h2>Entradas De Produtos</h2>
+
+    <div th:replace="~{fragments/lista-utils :: filtroEExportacao(
+   @{/listaPedido},
+   ${filtro},
+   'Buscar por ID ou Fornecedor',
+   |exportarTabelaPedidos()|
+   )}">
+    </div>
+
+    <table id="tabela-pedidos">
+        <thead>
+        <tr>
+            <th data-coluna="id">ID</th>
+            <th data-coluna="dataCadastro">Data de Cadastro</th>
+            <th data-coluna="fornecedor">Fornecedor</th>
+            <th data-coluna="valorTotal">Valor Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="pedido : ${pedido}">
+            <td data-coluna="id" th:text="${pedido.id}">ID</td>
+            <td data-coluna="dataCadastro" th:text="${#temporals.format(pedido.dataCadastro, 'dd/MM/yyyy HH:mm')}">Data</td>
+            <td data-coluna="fornecedor" th:text="${pedido.fornecedor.nomeFantasia}">Fornecedor</td>
+            <td data-coluna="valorTotal" th:text="${pedido.valorTotal}">Total</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="botoes-centralizados">
+        <a href="/index" class="btn-acao back-link">Voltar</a>
+        <a href="/cadastroPedido" class="btn-acao back-link">Cadastrar</a>
+    </div>
+</div>
+<script>
+    setTimeout(() => {
+      document.querySelectorAll('.mensagem').forEach(el => el.style.display = 'none');
+    }, 4000);
+</script>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/exportPdf.js"></script>
+</body>
+</html>

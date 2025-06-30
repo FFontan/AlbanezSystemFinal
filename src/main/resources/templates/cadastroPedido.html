@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Pedido</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+</head>
+<body class="form-page scroll-enabled">
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+    <div class="form-wrapper">
+        <h2>Cadastrar Pedido</h2>
+
+        <form action="/salvarPedido" method="post" th:object="${pedido}" class="form-cadastro">
+            <div class="form-section-promo">
+                <div>
+                    <label for="fornecedor">Fornecedor:</label>
+                    <select id="fornecedor" th:field="*{fornecedorId}">
+                        <option th:each="fornecedor : ${fornecedores}" th:value="${fornecedor.id}" th:text="${fornecedor.nomeFantasia}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label for="dataEntrega">Data de Entrega:</label>
+                    <input type="date" id="dataEntrega" th:field="*{dataEntrega}" required />
+                    <div class="erroFormulario" th:if="${#fields.hasErrors('dataEntrega')}" th:errors="*{dataEntrega}"></div>
+                </div>
+            </div>
+
+            <div th:if="${#fields.hasErrors('itens')}" class="erroFormulario" th:errors="*{itens}"></div>
+
+            <h2>Itens do Pedido</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th>Total</th>
+                    <th>Remover</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${pedido.itens}">
+                    <td th:text="${item.produtoId.descricao}"></td>
+                    <td th:text="${item.preco}"></td>
+                    <td th:text="${item.quantidade}"></td>
+                    <td th:text="${item.total}"></td>
+                    <td>
+                        <form action="/pedido/removerProduto" method="post" style="display: inline;">
+                            <input type="hidden" name="produtoId" th:value="${item.produtoId.id}" />
+                            <button type="submit" class="btn-remover-pedido" title="Remover produto">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <button type="button" onclick="confirmarEnvioForm(this, 'Deseja salvar este pedido?')">Salvar</button>
+        </form>
+
+        <form action="/pedido/adicionarProduto" method="post" class="form-cadastro" style="margin-top: 16px;">
+            <div class="form-section-promo">
+                <div>
+                    <label for="produtoId">Produto:</label>
+                    <select id="produtoId" name="produtoId" class="select2">
+                        <option value="" disabled selected>Selecione um produto</option>
+                        <th:block th:each="produto : ${produtos}">
+                            <option th:value="${produto.id}" th:text="${produto.descricao}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div>
+                    <label for="quantidade">Quantidade:</label>
+                    <input type="number" id="quantidade" name="quantidade" min="1" required />
+                </div>
+                <div style="display: flex; flex-direction: column; justify-content: flex-end;">
+                    <button type="submit" class="botao-inverso" style="height: 48px;">Adicionar Produto</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="botoes-centralizados">
+            <a href="/index" class="btn-acao back-link">Voltar</a>
+            <a href="/listaPedido" class="btn-acao back-link">Lista</a>
+        </div>
+    </div>
+</div>
+
+<script src="/js/dropdown.js"></script>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/confirmacoes.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+      $('.select2').select2({
+        placeholder: 'Selecione um produto',
+        width: 'resolve' // mantém o width correto
+      });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de Promoções</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <div class="mensagem-container">
+        <div th:if="${confirmacao}" class="mensagem confirmacao" th:text="${confirmacao}"></div>
+    </div>
+
+    <h2>Promoções</h2>
+
+    <div th:replace="~{fragments/lista-utils :: filtroEExportacao(
+   @{/listaPromocao},
+   ${filtro},
+   'Buscar por Nome ou ID',
+   |exportarTabelaPromocoes()|
+   )}">
+    </div>
+
+    <table id="tabela-promocoes">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Data Início</th>
+        <th>Data Fim</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="promocao : ${promocoes}">
+        <td data-coluna="id" th:text="${promocao.id}"></td>
+        <td data-coluna="nome" th:text="${promocao.nome}"></td>
+        <td data-coluna="dataInicio" th:text="${#temporals.format(promocao.dataInicio, 'dd/MM/yyyy HH:mm')}"></td>
+        <td data-coluna="dataFim" th:text="${#temporals.format(promocao.dataFim, 'dd/MM/yyyy HH:mm')}"></td>
+        <td data-coluna="status" th:text="${promocao.status}"></td>
+        <td class="actions">
+            <a th:href="@{'/promocao/' + ${promocao.id}}">
+                <i class="bi bi-eye"></i> Ver Produtos
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+    <div class="botoes-centralizados">
+        <a href="/index" class="btn-acao back-link">Voltar</a>
+        <a href="/cadastroPromocao" class="btn-acao back-link">Cadastrar</a>
+    </div>
+</div>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script>
+    setTimeout(() => {
+      document.querySelectorAll('.mensagem').forEach(el => el.style.display = 'none');
+    }, 4000);
+</script>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/exportPdf.js"></script>
+</body>
+</html>

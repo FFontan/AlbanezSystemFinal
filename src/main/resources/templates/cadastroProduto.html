@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Produto</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="form-page">
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+    <div class="form-wrapper">
+
+        <form class="form-cadastro" action="#" th:action="@{/produtos}" th:object="${produto}" method="post" enctype="multipart/form-data">
+
+            <h2>Cadastro de Produto</h2>
+
+            <div class="form-section">
+                <div class="linha">
+                    <div class="campo-descricao">
+                        <label for="descricao">Descrição:</label>
+                        <input type="text" id="descricao" th:field="*{descricao}"  />
+                        <div class="erroFormulario" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}" ></div>
+                    </div>
+                    <div class="campo-imagem">
+                        <label for="imagemFile">Imagem do Produto:</label>
+                        <input type="file" id="imagemFile" name="imagemFile" accept="image/*" />
+                    </div>
+                </div>
+
+                <div class="linha">
+                    <div>
+                        <label for="precoCusto">Preço de Custo:</label>
+                        <input type="number" step="0.01" id="precoCusto" th:field="*{precoCusto}" />
+                        <div class="erroFormulario" th:if="${#fields.hasErrors('precoCusto')}" th:errors="*{precoCusto}"></div>
+                    </div>
+                    <div>
+                        <label for="precoVenda">Preço de Venda:</label>
+                        <input type="number" step="0.01" id="precoVenda" th:field="*{precoVenda}" />
+                        <div class="erroFormulario" th:if="${#fields.hasErrors('precoVenda')}" th:errors="*{precoVenda}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="confirmarEnvioForm(this, 'Deseja cadastrar este produto?')">Cadastrar</button>
+                <div class="botoes-centralizados">
+                    <a href="/index" class="btn-acao back-link">Voltar</a>
+                    <a href="/listaProduto" class="btn-acao back-link">Lista</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+
+</body>
+</html>

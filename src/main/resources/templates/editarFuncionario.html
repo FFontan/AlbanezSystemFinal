@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Funcionário</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body class="form-page">
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+    <div class="form-wrapper">
+        <h1>Editar Funcionário</h1>
+
+        <form th:action="@{/editarFuncionario/{id}(id=${funcionario.id})}" th:object="${funcionario}" method="post" class="form-cadastro">
+
+            <div class="linha">
+                <div>
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" th:field="*{nome}" required />
+                    <div th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}" class="erroFormulario"></div>
+                </div>
+                <div>
+                    <label for="documento">Documento (CPF)</label>
+                    <input type="text" id="documento" th:field="*{documento}" required oninput="FormValidations.cpfCnpjMask(this)" />
+                    <div th:if="${#fields.hasErrors('documento')}" th:errors="*{documento}" class="erroFormulario"></div>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" th:field="*{telefone}" required oninput="FormValidations.telefoneMask(this)" />
+                    <div th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}" class="erroFormulario"></div>
+                </div>
+                <div>
+                    <label for="data_nasc">Data de Nascimento</label>
+                    <input type="date" id="data_nasc" th:field="*{data_nasc}" required />
+                    <div th:if="${#fields.hasErrors('data_nasc')}" th:errors="*{data_nasc}" class="erroFormulario"></div>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="salario">Salário</label>
+                    <input type="number" id="salario" th:field="*{salario}" step="0.01" required oninput="FormValidations.salarioMask(this)" />
+                    <div th:if="${#fields.hasErrors('salario')}" th:errors="*{salario}" class="erroFormulario"></div>
+                </div>
+            </div>
+
+            <h2 class="secao-endereco">Endereço</h2>
+
+            <div class="linha">
+                <div>
+                    <label for="logradouro">Logradouro</label>
+                    <input type="text" id="logradouro" th:field="*{endereco.logradouro}" required />
+                    <div th:if="${#fields.hasErrors('endereco.logradouro')}" th:errors="*{endereco.logradouro}" class="erroFormulario"></div>
+                </div>
+                <div>
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" th:field="*{endereco.numeroEndereco}" required />
+                    <div th:if="${#fields.hasErrors('endereco.numeroEndereco')}" th:errors="*{endereco.numeroEndereco}" class="erroFormulario"></div>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="bairro">Bairro</label>
+                    <input type="text" id="bairro" th:field="*{endereco.bairro}" required />
+                    <div th:if="${#fields.hasErrors('endereco.bairro')}" th:errors="*{endereco.bairro}" class="erroFormulario"></div>
+                </div>
+                <div>
+                    <label for="cep">CEP</label>
+                    <input type="text" id="cep" th:field="*{endereco.cep}" maxlength="9" required oninput="FormValidations.cepMask(this)" />
+                    <div th:if="${#fields.hasErrors('endereco.cep')}" th:errors="*{endereco.cep}" class="erroFormulario"></div>
+                </div>
+            </div>
+
+            <div class="linha">
+                <div>
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" th:field="*{endereco.cidade}" required />
+                    <div th:if="${#fields.hasErrors('endereco.cidade')}" th:errors="*{endereco.cidade}" class="erroFormulario"></div>
+                </div>
+                <div>
+                    <label for="uf">UF</label>
+                    <input type="text" id="uf" th:field="*{endereco.uf}" required />
+                    <div th:if="${#fields.hasErrors('endereco.uf')}" th:errors="*{endereco.uf}" class="erroFormulario"></div>
+                </div>
+            </div>
+
+            <!-- Botão com confirmação -->
+            <button type="button" onclick="confirmarEnvioForm(this, 'Deseja salvar as alterações?')" class="btn-acao" style="width: 100%;">
+                Salvar
+            </button>
+        </form>
+
+        <div class="botoes-centralizados">
+            <a href="/index" class="btn-acao back-link">Voltar</a>
+            <a href="/listaFuncionario" class="btn-acao back-link">Lista</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação e scripts -->
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/dropdown.js"></script>
+<script src="/js/formValidations.js"></script>
+<script src="/js/confirmacoes.js"></script>
+
+</body>
+</html>

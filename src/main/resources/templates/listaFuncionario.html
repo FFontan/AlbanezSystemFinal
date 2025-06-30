@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Listagem de Funcionários</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <div class="mensagem-container">
+        <div th:if="${confirmacao}" class="mensagem confirmacao" th:text="${confirmacao}"></div>
+        <div th:if="${sucesso}" class="mensagem sucesso" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="mensagem erro" th:text="${erro}"></div>
+    </div>
+
+    <h2>Lista de Funcionários</h2>
+
+    <div th:replace="~{fragments/lista-utils :: filtroEExportacao(
+       @{/listaFuncionario},
+       ${filtro},
+       'Buscar por ID, Nome ou CPF',
+       |exportarTabelaFuncionarios()|
+       )}">
+    </div>
+    <table id="tabela-funcionarios">
+        <thead>
+        <tr>
+            <th data-coluna="id">ID</th>
+            <th data-coluna="documento">CPF</th>
+            <th data-coluna="nome">Nome</th>
+            <th data-coluna="telefone">Fone</th>
+            <th data-coluna="dataNasc">Data de Nascimento</th>
+            <th data-coluna="salario">Salário</th>
+            <th data-coluna="logradouro">Logradouro</th>
+            <th data-coluna="numeroEndereco">Número</th>
+            <th data-coluna="bairro">Bairro</th>
+            <th data-coluna="cep">CEP</th>
+            <th data-coluna="cidade">Cidade</th>
+            <th data-coluna="uf">UF</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="funcionario : ${listaFuncionarios}">
+            <td data-coluna="id"           th:text="${funcionario.id}"></td>
+            <td data-coluna="documento"    th:text="${funcionario.documento}"></td>
+            <td data-coluna="nome"         th:text="${funcionario.nome}"></td>
+            <td data-coluna="telefone"     th:text="${funcionario.telefone}"></td>
+            <td data-coluna="data_nasc" th:text="${#temporals.format(funcionario.data_nasc, 'dd/MM/yyyy')}"></td>
+            <td data-coluna="salario"      th:text="${funcionario.salario}"></td>
+            <td data-coluna="logradouro"   th:text="${funcionario.endereco.logradouro}"></td>
+            <td data-coluna="numeroEndereco" th:text="${funcionario.endereco.numeroEndereco}"></td>
+            <td data-coluna="bairro"       th:text="${funcionario.endereco.bairro}"></td>
+            <td data-coluna="cep"          th:text="${funcionario.endereco.cep}"></td>
+            <td data-coluna="cidade"       th:text="${funcionario.endereco.cidade}"></td>
+            <td data-coluna="uf"           th:text="${funcionario.endereco.uf}"></td>
+            <td class="actions" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0;">
+                <a th:href="@{'/editarFuncionario/' + ${funcionario.id}}" title="Editar" class="btn-icon editar"><i class="bi bi-pencil"></i></a>
+                <a href="javascript:void(0);"
+                   th:attr="data-id=${funcionario.id}"
+                   onclick="confirmarBotao('Deseja realmente excluir este funcionário?', () => window.location.href='/excluirFuncionario/' + this.getAttribute('data-id'))"
+                   title="Excluir"
+                   class="btn-icon excluir">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="botoes-centralizados">
+        <a href="/index" class="btn-acao back-link">Voltar</a>
+        <a href="/cadastroFuncionario" class="btn-acao back-link">Cadastrar</a>
+    </div>
+</div>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script>
+    setTimeout(() => {
+      document.querySelectorAll('.mensagem').forEach(el => el.style.display = 'none');
+    }, 4000);
+</script>
+<script src="/js/confirmacoes.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/exportPdf.js"></script>
+</body>
+</html>

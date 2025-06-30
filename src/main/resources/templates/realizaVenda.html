@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Realizar Venda</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+
+<body class="form-page scroll-enabled realizar-venda">
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+
+<div class="content">
+    <div class="form-wrapper">
+        <h2>Realizar Venda</h2>
+
+        <form th:action="@{/realizaVenda}" th:object="${vendaForm}" method="post">
+                <!-- Cliente -->
+                <div class="cliente-container">
+                    <label for="cliente">Cliente:</label>
+                    <select id="cliente" th:field="*{clienteId}" class="select-search">
+                        <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nome}"></option>
+                    </select>
+                </div>
+                <div
+                        class="error"
+                        th:if="${#fields.hasErrors('clienteId')}"
+                        th:errors="*{clienteId}"
+                ></div>
+
+                <!-- Itens da Venda -->
+            <table id="itens">
+                <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Qtd.</th>
+                    <th>Preço Unit.</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody th:each="item, iterStat : *{itens}">
+                <tr>
+                    <td>
+                        <select
+                                class="produto-selector select-search"
+                                th:field="*{itens[__${iterStat.index}__].produtoId}"
+                        >
+                            <option value="" disabled>Selecione um produto</option>
+                            <option
+                                    th:each="p : ${produtos}"
+                                    th:value="${p.id}"
+                                    th:text="${p.descricao}"
+                            ></option>
+                        </select>
+                        <div
+                                class="error"
+                                th:if="${#fields.hasErrors('itens[' + iterStat.index + '].produtoId')}"
+                                th:errors="*{itens[__${iterStat.index}__].produtoId}"
+                        ></div>
+                    </td>
+                    <td>
+                        <input type="number" class="qty-input" min="1" step="1" th:field="*{itens[__${iterStat.index}__].quantidade}"/>
+                        <div class="error"
+                                th:if="${#fields.hasErrors('itens[' + iterStat.index + '].quantidade')}"
+                                th:errors="*{itens[__${iterStat.index}__].quantidade}"
+                        ></div>
+                    </td>
+                    <td class="preco-unitario">0,00</td>
+                    <td class="subtotal">0,00</td>
+                    <td>
+                        <button type="button" class="btn-remover">×</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <button type="button" id="btn-add">Adicionar Item</button>
+
+                <div class="total-container">
+                    <span class="total-label">Total da Venda:</span>
+                    <span id="total" class="total-value">0,00</span>
+                </div>
+
+                <!-- Aqui a mensagem de erro geral da validação -->
+            <div id="mensagem-erro" style="color:red; margin-bottom: 10px;"></div>
+
+            <button type="button" id="btn-finalizar" onclick="confirmarEnvioForm(this, 'Deseja finalizar esta venda?')">Finalizar</button>
+        </form>
+        <div class="botoes-centralizados">
+            <a href="/index" class="btn-acao back-link">Voltar</a>
+            <a href="/listaVendas" class="btn-acao back-link">Lista</a>
+        </div>
+    </div>
+</div>
+
+<!-- Template puro para clonagem via JavaScript -->
+<template id="linha-template">
+    <tr>
+        <td>
+            <select class="produto-selector select-search">
+                <option value="" disabled>Selecione um produto</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" class="qty-input" min="1" step="1" value="1" />
+        </td>
+        <td class="preco-unitario">0,00</td>
+        <td class="subtotal">0,00</td>
+        <td><button type="button" class="btn-remover">×</button></td>
+    </tr>
+</template>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const produtos = /*[[${produtos}]]*/ [];
+    const produtosMap = {};
+    produtos.forEach((p) => {
+        produtosMap[p.id] = { preco: p.precoFinal, quantidade: p.quantidade, descricao: p.descricao};
+    });
+    /*]]>*/
+</script>
+
+<script>
+    function reindexar() {
+        document.querySelectorAll("#itens tbody tr").forEach((tr, i) => {
+            tr.querySelector(".produto-selector").setAttribute("name", `itens[${i}].produtoId`);
+            tr.querySelector(".qty-input").setAttribute("name", `itens[${i}].quantidade`);
+        });
+    }
+
+    function atualizarSubtotal(tr) {
+        const select = tr.querySelector(".produto-selector");
+        const quantidadeInput = tr.querySelector(".qty-input");
+        const precoTd = tr.querySelector(".preco-unitario");
+        const subtotalTd = tr.querySelector(".subtotal");
+
+        const produtoId = select.value;
+        const preco = produtosMap[produtoId] ? produtosMap[produtoId].preco : 0;
+        const quantidade = parseFloat(quantidadeInput.value) || 0;
+        const subtotal = preco * quantidade;
+
+        precoTd.textContent = preco.toFixed(2).replace(".", ",");
+        subtotalTd.textContent = subtotal.toFixed(2).replace(".", ",");
+
+        atualizarTotal();
+        validarVenda();
+    }
+
+    function atualizarTotal() {
+        let total = 0;
+        document.querySelectorAll("#itens tbody tr").forEach((tr) => {
+            const subtotalText = tr.querySelector(".subtotal").textContent.replace(",", ".");
+            total += parseFloat(subtotalText) || 0;
+        });
+        document.querySelector("#total").textContent = total.toFixed(2).replace(".", ",");
+    }
+
+    function preencherSelectProdutos(select) {
+        produtos.forEach((p) => {
+            const option = document.createElement("option");
+            option.value = p.id;
+            option.textContent = p.descricao;
+            select.appendChild(option);
+        });
+    }
+
+    function adicionarEventos(tr) {
+        const select = tr.querySelector(".produto-selector");
+        const input = tr.querySelector(".qty-input");
+        const btnRemover = tr.querySelector(".btn-remover");
+
+        $(select).on("change", () => {
+            atualizarSubtotal(tr);
+            validarVenda();
+        });
+        input.addEventListener("change", () => {
+            atualizarSubtotal(tr);
+            validarVenda();
+        });
+
+        btnRemover.addEventListener("click", () => {
+            if ($(select).hasClass("select2-hidden-accessible")) {
+                $(select).select2("destroy");
+            }
+            tr.remove();
+            reindexar();
+            atualizarTotal();
+            validarVenda();
+        });
+    }
+
+function validarVenda() {
+    const mensagemErroEl = document.getElementById("mensagem-erro");
+    const btnFinalizar = document.getElementById("btn-finalizar");
+
+    let erros = [];
+
+    const linhas = document.querySelectorAll("#itens tbody tr");
+
+    if (linhas.length === 0) {
+        erros.push("A venda deve conter pelo menos um produto.");
+    }
+
+    // Validação individual das linhas
+    linhas.forEach((tr, index) => {
+        const select = tr.querySelector(".produto-selector");
+        const produtoId = select.value;
+
+        const inputQtd = tr.querySelector(".qty-input");
+        const quantidade = parseInt(inputQtd.value, 10);
+
+        if (!produtoId) {
+            erros.push(`Linha ${index + 1}: produto não selecionado.`);
+        }
+
+        if (!quantidade || quantidade <= 0) {
+            erros.push(`Linha ${index + 1}: quantidade deve ser maior que zero.`);
+        }
+
+        if (!Number.isInteger(quantidade)) {
+            erros.push(`Linha ${index + 1}: quantidade deve ser um número inteiro.`);
+        }
+    });
+
+    // Soma das quantidades por produto para validação de estoque
+    const quantidadesPorProduto = {};
+    linhas.forEach((tr) => {
+        const select = tr.querySelector(".produto-selector");
+        const produtoId = select.value;
+
+        const inputQtd = tr.querySelector(".qty-input");
+        const quantidade = parseInt(inputQtd.value, 10) || 0;
+
+        if (produtoId) {
+            quantidadesPorProduto[produtoId] = (quantidadesPorProduto[produtoId] || 0) + quantidade;
+        }
+    });
+
+    // Validação do estoque total por produto
+    for (const produtoId in quantidadesPorProduto) {
+        const quantidadeTotal = quantidadesPorProduto[produtoId];
+        const estoque = produtosMap[produtoId] ? produtosMap[produtoId].quantidade : 0;
+        const nomeProduto = produtosMap[produtoId] ? produtosMap[produtoId].descricao : produtoId;
+
+        if (quantidadeTotal > estoque) {
+            erros.push(`Produto "${nomeProduto}": quantidade total (${quantidadeTotal}) maior que o estoque disponível (${estoque}).`);
+        }
+    }
+
+    if (erros.length > 0) {
+        mensagemErroEl.innerHTML = erros.join("<br>");
+        btnFinalizar.disabled = true;
+    } else {
+        mensagemErroEl.innerHTML = "";
+        btnFinalizar.disabled = false;
+    }
+}
+    document.getElementById("btn-add").addEventListener("click", function () {
+        const template = document.getElementById("linha-template");
+        const tbody = document.querySelector("#itens tbody");
+        const clone = template.content.cloneNode(true);
+        const tr = clone.querySelector("tr");
+
+        const index = tbody.children.length;
+
+        const select = tr.querySelector(".produto-selector");
+        preencherSelectProdutos(select);
+        select.setAttribute("name", `itens[${index}].produtoId`);
+        tr.querySelector(".qty-input").setAttribute("name", `itens[${index}].quantidade`);
+
+        tbody.appendChild(tr);
+
+        $(select).select2({
+            placeholder: "Selecione um produto",
+            width: "100%",
+        });
+
+        $(select).on("change", () => {
+            atualizarSubtotal(tr);
+            validarVenda();
+        });
+
+        const input = tr.querySelector(".qty-input");
+        input.addEventListener("change", () => {
+            atualizarSubtotal(tr);
+            validarVenda();
+        });
+
+        const btnRemover = tr.querySelector(".btn-remover");
+        btnRemover.addEventListener("click", () => {
+            if ($(select).hasClass("select2-hidden-accessible")) {
+                $(select).select2("destroy");
+            }
+            tr.remove();
+            reindexar();
+            atualizarTotal();
+            validarVenda();
+        });
+
+        atualizarSubtotal(tr);
+        validarVenda();
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const clienteSelect = document.querySelector("#cliente");
+        if (clienteSelect) {
+            $(clienteSelect).select2({
+                placeholder: "Selecione um cliente",
+                width: "100%",
+            });
+        }
+
+        document.querySelectorAll(".produto-selector").forEach((select) => {
+            $(select).select2({
+                placeholder: "Selecione um produto",
+                width: "100%",
+            });
+
+            $(select).on("change", () => {
+                const tr = select.closest("tr");
+                if (tr) atualizarSubtotal(tr);
+                validarVenda();
+            });
+        });
+
+        document.querySelectorAll("#itens tbody tr").forEach((tr) => {
+            const input = tr.querySelector(".qty-input");
+            const btnRemover = tr.querySelector(".btn-remover");
+            const select = tr.querySelector(".produto-selector");
+
+            input.addEventListener("change", () => {
+                atualizarSubtotal(tr);
+                validarVenda();
+            });
+
+            btnRemover.addEventListener("click", () => {
+                if ($(select).hasClass("select2-hidden-accessible")) {
+                    $(select).select2("destroy");
+                }
+                tr.remove();
+                reindexar();
+                atualizarTotal();
+                validarVenda();
+            });
+
+            atualizarSubtotal(tr);
+            validarVenda();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (
+                e.target.classList.contains("qty-input") &&
+                (e.key === '.' || e.key === ',')
+            ) {
+                e.preventDefault(); // impede o caractere
+            }
+        });
+
+
+        validarVenda();
+    });
+</script>
+<script src="/js/dropdown.js"></script>
+<div th:replace="fragments/modalConfirmacao :: modalConfirmacao"></div>
+<script src="/js/confirmacoes.js"></script>
+</body>
+</html>
