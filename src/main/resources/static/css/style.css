@@ -1290,4 +1290,8 @@ body.form-page .botoes-centralizados {
   margin: 0;
 }
 
+.coluna-direita {
+  text-align: right;
+}
+
 }

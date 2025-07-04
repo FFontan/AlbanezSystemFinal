@@ -43,7 +43,7 @@
             <td data-coluna="id" th:text="${pedido.id}">ID</td>
             <td data-coluna="dataCadastro" th:text="${#temporals.format(pedido.dataCadastro, 'dd/MM/yyyy HH:mm')}">Data</td>
             <td data-coluna="fornecedor" th:text="${pedido.fornecedor.nomeFantasia}">Fornecedor</td>
-            <td data-coluna="valorTotal" th:text="${pedido.valorTotal}">Total</td>
+            <td data-coluna="valorTotal" class="coluna-direita" th:text="${pedido.valorTotal}">Total</td>
         </tr>
         </tbody>
     </table>

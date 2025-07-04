@@ -62,13 +62,13 @@
             </td>
 
             <td data-coluna="descricao" th:text="${produto.descricao}"></td>
-            <td data-coluna="precoCusto" th:text=" 'R$' + ${#numbers.formatDecimal(produto.precoCusto, 1, 'POINT', 2, 'COMMA')}"></td>
-            <td data-coluna="precoVenda" th:text=" 'R$' + ${#numbers.formatDecimal(produto.precoVenda, 1, 'POINT', 2, 'COMMA')}"></td>
-            <td data-coluna="precoFinal">
+            <td data-coluna="precoCusto" class="coluna-direita" th:text=" 'R$' + ${#numbers.formatDecimal(produto.precoCusto, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td data-coluna="precoVenda" class="coluna-direita" th:text=" 'R$' + ${#numbers.formatDecimal(produto.precoVenda, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td data-coluna="precoFinal" class="coluna-direita">
                 <span th:text="'R$' + ${#numbers.formatDecimal(produto.precoFinal, 1, 'POINT', 2, 'COMMA')}"></span>
                 <span class="desconto" th:text="' (R$' + ${#numbers.formatDecimal(produto.desconto, 1, 'POINT', 2, 'COMMA')} + ')'"></span>
             </td>
-            <td data-coluna="quantidade" th:text="${produto.quantidade}"></td>
+            <td data-coluna="quantidade" class="coluna-direita" th:text="${produto.quantidade}"></td>
             <td class="actions" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0;">
                 <!-- Ícone de edição (azul) -->
                 <a th:href="@{'/editarProduto/' + ${produto.id}}" title="Editar" class="btn-icon editar">

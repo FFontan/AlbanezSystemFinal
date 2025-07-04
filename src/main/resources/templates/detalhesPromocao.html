@@ -79,8 +79,8 @@
             <!-- Se o produto existir, mostramos preço original e final + ações -->
             <th:block th:if="${produtoPromo.produto != null}">
                 <td th:text="${produtoPromo.produto.descricao}">Descrição</td>
-                <td th:text="'R$ ' + ${#numbers.formatDecimal(produtoPromo.produto.precoVenda, 1, 'POINT', 2, 'COMMA')}">Preço Original</td>
-                <td th:text="'R$ ' + ${#numbers.formatDecimal(produtoPromo.produto.precoFinal, 1, 'POINT', 2, 'COMMA')}">Preço Promocional</td>
+                <td class="coluna-direita" th:text="'R$ ' + ${#numbers.formatDecimal(produtoPromo.produto.precoVenda, 1, 'POINT', 2, 'COMMA')}">Preço Original</td>
+                <td class="coluna-direita" th:text="'R$ ' + ${#numbers.formatDecimal(produtoPromo.produto.precoFinal, 1, 'POINT', 2, 'COMMA')}">Preço Promocional</td>
             </th:block>
         </tr>
         </tbody>
